@@ -3,6 +3,8 @@ const X_CHAR = 'x'
 const A_CHAR = 'a'
 const B_CHAR = 'b'
 
+const LEAVE_INNER_BLANKS = false
+
 function tmComputation(w) {
 
     // TMs have blank spaces on the tape after the input
@@ -24,7 +26,12 @@ function tmComputation(w) {
     const readTapeHead = _ => { return w[tapeHead] }
 
     // log tm machine state
-    const logTMState = _ => console.log(`tape=${w.replace(/_/g, '')}\ttapeHead=${tapeHead}`)
+    const logTMState = _ => {
+        if (LEAVE_INNER_BLANKS)
+            console.log(`tape=${w.replace(/^_*|_*$/g, '')}\ttapeHead=${tapeHead}`)
+        else
+            console.log(`tape=${w.replace(/_/g, '')}\ttapeHead=${tapeHead}`)
+    }
 
     const moveToEnd = () => {
         while (true) {
@@ -38,7 +45,9 @@ function tmComputation(w) {
         }
     }
 
-    const inBHalt = () => {
+    const nGood = () => {
+        moveToEnd()
+
         tapeHeadLeft()
         logTMState()
 
@@ -49,97 +58,93 @@ function tmComputation(w) {
                 logTMState()
             }
             else if (readTapeHead() == X_CHAR) {
-                return writeAB()
-            }
-        }
-    }
-
-    const notInBHalt = () => {
-        tapeHeadLeft()
-        logTMState()
-
-        while (true) {
-            if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR) {
-                writeAtTapeHead(X_CHAR)
-                tapeHeadLeft()
-                logTMState()
-            }
-            else if (readTapeHead() == X_CHAR) {
-                return writeAA()
-            }
-        }
-    }
-
-    const writeAA = () => {
-        writeAtTapeHead(A_CHAR)
-        tapeHeadRight()
-        logTMState()
-
-        writeAtTapeHead(A_CHAR)
-        tapeHeadRight()
-        logTMState()
-
-        while (true) {
-            if (readTapeHead() == BLANK_SPACE)
-                return 'halt'
-            else {
-                writeAtTapeHead(BLANK_SPACE)
+                writeAtTapeHead(A_CHAR)
                 tapeHeadRight()
                 logTMState()
+                
+                writeAtTapeHead(B_CHAR)
+                tapeHeadRight()
+                logTMState()
+
+                while (true) {
+                    if (readTapeHead() == BLANK_SPACE)
+                        return 'halt'
+                    else {
+                        writeAtTapeHead(BLANK_SPACE)
+                        tapeHeadRight()
+                        logTMState()
+                    }
+                }
             }
         }
     }
 
-    const writeAB = () => {
+    const nBad = () => {
+        moveToEnd()
+
+        tapeHeadLeft()
+        logTMState()
+
+        while (true) {
+            if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR) {
+                writeAtTapeHead(X_CHAR)
+                tapeHeadLeft()
+                logTMState()
+            }
+            else if (readTapeHead() == X_CHAR) {
+                writeAtTapeHead(A_CHAR)
+                tapeHeadRight()
+                logTMState()
+
+                writeAtTapeHead(A_CHAR)
+                tapeHeadRight()
+                logTMState()
+
+                while (true) {
+                    if (readTapeHead() == BLANK_SPACE)
+                        return 'halt'
+                    else {
+                        writeAtTapeHead(BLANK_SPACE)
+                        tapeHeadRight()
+                        logTMState()
+                    }
+                }
+            }
+        }
+    }
+
+
+    // -----------------------------------------
+    // run simulation for TM computing function
+    // -----------------------------------------
+
+    logTMState()
+
+    // if tape is blank, write ab and halt
+    if (readTapeHead() == BLANK_SPACE){
         writeAtTapeHead(A_CHAR)
         tapeHeadRight()
         logTMState()
-        
+
         writeAtTapeHead(B_CHAR)
         tapeHeadRight()
         logTMState()
 
-        while (true) {
-            if (readTapeHead() == BLANK_SPACE)
-                return 'halt'
-            else {
-                writeAtTapeHead(BLANK_SPACE)
-                tapeHeadRight()
-                logTMState()
-            }
-        }
+        return 'halt'
     }
-
-
-    // run simulation for TM computing function
-    logTMState()
-
-    // if blank space, make sure tape is 'ab' then halt
-    if (readTapeHead() == BLANK_SPACE)
-        return writeAB()
-    // if 'a' move tape head right
-    else if (readTapeHead() == A_CHAR) {
+    // if 'a' or 'b' move tape head right
+    else if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR) {
         writeAtTapeHead(X_CHAR)
         tapeHeadRight()
-    }
-    // if any character other than blank, make sure tape is 'aa' then halt
-    else {
-        writeAtTapeHead(X_CHAR)
-        tapeHeadRight()
-        moveToEnd()
-        return notInBHalt()
+        logTMState()
     }
 
-    logTMState()
-
-    // read char on tape at tape head
-    // if 'a' move tape head right
-    if (readTapeHead() == A_CHAR)
+    // if 'a' or 'b' move tape head right
+    if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR)
         tapeHeadRight()
-    // if any character other than 'a', make sure tape is 'aa' then halt
-    else {
-        moveToEnd()
-        return notInBHalt()
+    // if blank char, make sure tape is 'aa' then halt
+    else if (readTapeHead() == BLANK_SPACE) {
+        return nBad()
     }
 
     while (true) {
@@ -149,30 +154,29 @@ function tmComputation(w) {
         // read char on tape at tape head
         // if blank space, make sure tape is 'ab' then halt
         if (readTapeHead() == BLANK_SPACE)
-            return inBHalt()
-        // if 'a' move tape head right
-        else if (readTapeHead() == A_CHAR)
+            return nGood()
+        // if 'a' or 'b' move tape head right
+        else if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR)
             tapeHeadRight()
-        // if any character other than blank or 'a', make sure tape is 'aa' then halt
-        else {
-            moveToEnd()
-            return notInBHalt()
-        }
 
         logTMState()
 
         // read char on tape at tape head
-        // if 'a' move tape head right
-        if (readTapeHead() == A_CHAR)
+        // if 'a' or 'b' move tape head right
+        if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR) {
             tapeHeadRight()
-        // if any character other than 'a', make sure tape is 'aa' then halt
-        else {
-            moveToEnd()
-            return notInBHalt()
+            logTMState()
+        }
+        // if blank space, make sure tape is 'aa' then halt
+        else if (readTapeHead() == BLANK_SPACE) {
+            return nBad()
         }
     }
 }
 
-console.log(tmComputation('aaaa'))
-console.log()
 console.log(tmComputation(''))
+console.log()
+console.log(tmComputation('aaaaaa'))
+console.log(tmComputation('b'))
+console.log(tmComputation('aabbaaaa'))
+console.log(tmComputation('bb'))
