@@ -1,0 +1,20 @@
+{
+  "type": "module",
+  "name": "cse105-project-tm-simulation",
+  "version": "1.0.0",
+  "description": "CSE 105 Final Project Task 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arth-shukla/cse105-project-TM-simulation.git"
+  },
+  "author": "Arth Shukla",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arth-shukla/cse105-project-TM-simulation/issues"
+  },
+  "homepage": "https://github.com/arth-shukla/cse105-project-TM-simulation#readme"
+}
