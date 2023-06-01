@@ -33,20 +33,7 @@ function tmComputation(w) {
             console.log(`tape=${w.replace(/_/g, '')}\ttapeHead=${tapeHead}`)
     }
 
-    const moveToEnd = () => {
-        while (true) {
-            if (readTapeHead() == A_CHAR || readTapeHead() == B_CHAR) {
-                tapeHeadRight()
-                logTMState()
-            }
-            else if (readTapeHead() == BLANK_SPACE) {
-                break
-            }
-        }
-    }
-
     const nGood = () => {
-        moveToEnd()
 
         tapeHeadLeft()
         logTMState()
@@ -80,7 +67,6 @@ function tmComputation(w) {
     }
 
     const nBad = () => {
-        moveToEnd()
 
         tapeHeadLeft()
         logTMState()
@@ -176,7 +162,4 @@ function tmComputation(w) {
 
 console.log(tmComputation(''))
 console.log()
-console.log(tmComputation('aaaaaa'))
-console.log(tmComputation('b'))
-console.log(tmComputation('aabbaaaa'))
-console.log(tmComputation('bb'))
+console.log(tmComputation('baba'))
